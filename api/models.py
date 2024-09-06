@@ -26,6 +26,7 @@ class Post(models.Model):
     content = models.TextField()
     published = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=10, choices=STATUS_OPTIONS, default='published')
+    slug = models.SlugField(max_length=250, unique_for_date=published)
 
     objects = models.Manager
     postobjects = PostObjects()
