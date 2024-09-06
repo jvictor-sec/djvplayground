@@ -1,9 +1,13 @@
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework import generics
 
-# Create your views here.
+from .models import Post
+from .serializers import PostSerializer
 
-@api_view(['GET'])
-def hello_world(request):
-    return Response('hello, world!', status.HTTP_201_CREATED)
+class PostList(generics.ListCreateAPIView):
+    queryset = Post.postobjects.all()
+    serializer_class = PostSerializer
+
+class PostDetail(generics.RetrieveDestroyAPIView):
+    queryset = Post.postobjects.all()
+    serializer_class = PostSerializer
+    
