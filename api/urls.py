@@ -1,14 +1,10 @@
-from django.contrib import admin
-from django.urls import path
+from rest_framework.routers import DefaultRouter
 
-from .views import *
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .views import User, Post
 
-urlpatterns = [
-    path('user/', UserCreate.as_view()),
-    path('logout-user/', LogoutUser.as_view()),
-    path('posts/', PostList.as_view()),
-    path('posts/<int:pk>/', PostDetail.as_view()),
-    path('get-token/', TokenObtainPairView.as_view()),
-    path('refresh-token/', TokenRefreshView.as_view())
-]
+router = DefaultRouter()
+
+router.register('post', Post, basename='posts')
+router.register('user', User, basename='users')
+
+urlpatterns = router.urls

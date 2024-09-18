@@ -1,36 +1,41 @@
-from rest_framework import generics
-from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework import status
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Post
+from .models import User, Post
 from .serializers import UserSerializer, LogoutSerializer, PostSerializer
 from .permissions import PostUserWritePermission
 
-
-class UserCreate(generics.CreateAPIView):
+class User(ModelViewSet):
     permission_classes = [AllowAny]
     serializer_class = UserSerializer
+    queryset = User.objects.all()
 
-class LogoutUser(generics.CreateAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = LogoutSerializer
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def login(self, request):
+        serializer_class = TokenObtainPairSerializer(data=request.data)
 
-    def perform_create(self, serializer):
-        refresh_token = serializer.validated_data.get('refresh_token')
+        if serializer_class.is_valid():
+            return Response(serializer_class.validated_data, status=status.HTTP_200_OK)
 
+        return Response(serializer_class.errors, status=status.HTTP_401_UNAUTHORIZED)
+
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def logout(self, request):
         try:
+            refresh_token = request.data.get('refresh_token')
             token = RefreshToken(refresh_token)
             token.blacklist()
+            return Response({"detail": "Logout successful."}, status=status.HTTP_200_OK)
         except Exception as e:
-            raise ValueError("Token inválido ou não encontrado")
+            return Response({"detail": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
 
-class PostList(generics.ListCreateAPIView):
-    queryset = Post.postobjects.all()
-    serializer_class = PostSerializer
-
-class PostDetail(generics.RetrieveUpdateDestroyAPIView):
+class Post(ModelViewSet):
     permission_classes = [PostUserWritePermission]
-    queryset = Post.postobjects.all()
     serializer_class = PostSerializer
-    
+    queryset = Post.postobjects.all()
