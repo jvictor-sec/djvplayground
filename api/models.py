@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import slugify
 
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
 from django.utils import timezone
@@ -81,10 +82,15 @@ class Post(models.Model):
     content = models.TextField()
     published = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=10, choices=STATUS_OPTIONS, default='published')
-    slug = models.SlugField(max_length=250, unique_for_date=published)
+    slug = models.SlugField(max_length=250, unique_for_date='published')
 
-    objects = models.Manager
+    objects = models.Manager()
     postobjects = PostObjects()
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(f"{self.title}-{self.published.date()}")
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ('-published',)
