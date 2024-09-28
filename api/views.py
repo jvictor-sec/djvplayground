@@ -11,19 +11,19 @@ from .models import User, Post
 from .serializers import UserSerializer, LogoutSerializer, PostSerializer
 from .permissions import PostUserWritePermission
 
-class User(ModelViewSet):
+class UserViewSet(ModelViewSet):
     permission_classes = [AllowAny]
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def login(self, request):
-        serializer_class = TokenObtainPairSerializer(data=request.data)
+        serializer = TokenObtainPairSerializer(data=request.data)
 
-        if serializer_class.is_valid():
-            return Response(serializer_class.validated_data, status=status.HTTP_200_OK)
+        if serializer.is_valid():
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
-        return Response(serializer_class.errors, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def logout(self, request):
@@ -35,7 +35,14 @@ class User(ModelViewSet):
         except Exception as e:
             return Response({"detail": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
 
-class Post(ModelViewSet):
+class PostViewSet(ModelViewSet):
     permission_classes = [PostUserWritePermission]
     serializer_class = PostSerializer
     queryset = Post.postobjects.all()
+
+    @action(detail=False, methods=['get'], url_path='list-by-slug/(?P<slug>[^/.]+)')
+    def list_by_slug(self, request, slug=None):
+        posts = self.queryset.filter(slug__icontains=slug)
+        serializer = self.get_serializer(posts, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
