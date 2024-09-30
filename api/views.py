@@ -7,9 +7,12 @@ from rest_framework import status
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from django_filters import rest_framework as filters
+
 from .models import User, Post
 from .serializers import UserSerializer, LogoutSerializer, PostSerializer
 from .permissions import PostUserWritePermission
+from .filters import PostFilter
 
 class UserViewSet(ModelViewSet):
     permission_classes = [AllowAny]
@@ -38,11 +41,6 @@ class UserViewSet(ModelViewSet):
 class PostViewSet(ModelViewSet):
     permission_classes = [PostUserWritePermission]
     serializer_class = PostSerializer
-    queryset = Post.postobjects.all()
-
-    @action(detail=False, methods=['get'], url_path='list-by-slug/(?P<slug>[^/.]+)')
-    def list_by_slug(self, request, slug=None):
-        posts = self.queryset.filter(slug__icontains=slug)
-        serializer = self.get_serializer(posts, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    queryset = Post.objects.all()
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_class = PostFilter
