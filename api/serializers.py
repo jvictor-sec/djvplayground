@@ -19,9 +19,6 @@ class UserSerializer(serializers.ModelSerializer):
 
         return user
 
-class LogoutSerializer(serializers.Serializer):
-    refresh_token = serializers.CharField()
-
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
