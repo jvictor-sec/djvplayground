@@ -206,3 +206,5 @@ SPECTACULAR_SETTINGS = {
         'persistAuthorization': True,
     }
 }
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
