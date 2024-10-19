@@ -1,0 +1,4 @@
+*.pyn
+__pycache__
+.env
+djvplayground-env
