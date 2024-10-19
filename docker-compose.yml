@@ -1,0 +1,52 @@
+services:
+  app:
+    container_name: djvplayground-app
+    build: ./app
+    ports:
+      - 3000:3000
+    volumes:
+      - ./app:/app
+    networks:
+      - app-network
+    depends_on:
+      - api
+  api:
+    container_name: djvplayground-api
+    build: ./api
+    ports:
+      - 8000:8000
+    volumes:
+      - ./api:/api
+    env_file:
+      - ./api/.env
+    networks:
+      - app-network
+      - db-network
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    container_name: djvplayground-db
+    image: mysql:8.0-debian
+    ports:
+      - 3308:3306
+    volumes:
+      - db-data:/var/lib/mysql
+    env_file:
+      - ./api/.env
+    networks:
+      - db-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+volumes:
+  db-data:
+    driver: local
+networks:
+  app-network:
+    driver: bridge
+  db-network:
+    driver: bridge
