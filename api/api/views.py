@@ -41,6 +41,6 @@ class UserViewSet(ModelViewSet):
 class PostViewSet(ModelViewSet):
     permission_classes = [PostUserWritePermission, IsAuthenticatedOrReadOnly]
     serializer_class = PostSerializer
-    queryset = Post.objects.all()
+    queryset = Post.postobjects.all()
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = PostFilter
